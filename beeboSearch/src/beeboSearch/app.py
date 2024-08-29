@@ -8,22 +8,37 @@ import sys
 site_packages_dir = os.path.join(sys.prefix, 'lib', 'python3.12', 'site-packages')
 sys.path.append(site_packages_dir)
 
+
 def build(app):
     main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
-    # Create a box for search input and button
+    # Create a box for search input, medium selection, and button
     search_box = toga.Box(style=Pack(direction=ROW, padding=5))
 
     search_input = toga.TextInput(placeholder="Search a movie", style=Pack(flex=1))
     search_box.add(search_input)
 
+    # Add medium selection widget
+    medium_selection = toga.Selection(
+        items=['All', 'DVD', 'Book', 'CD', 'eBook'],
+        style=Pack(width=100)
+    )
+    search_box.add(medium_selection)
+
     def search_movies(widget):
         search_term = search_input.value
-        print(search_term)
+        selected_medium = medium_selection.value
+        print(f"Searching for: {search_term}, Medium: {selected_medium}")
+
         titles = search(search_term)
         result_box.clear()
-        for title in titles:
-            if title[1]:  # ausleihbar
+
+        for title, ausleihbar in titles:
+            # Filter by medium if a specific medium is selected
+            if selected_medium != 'All' and selected_medium.lower() not in title.lower():
+                continue
+
+            if ausleihbar:
                 label = toga.Label(
                     title,
                     style=Pack(padding=5, background_color='#FFFF00')  # Yellow background
@@ -52,5 +67,6 @@ def build(app):
 
     return main_box
 
+
 def main():
-    return toga.App("First App", "org.beeware.beebo.search", startup=build)
+    return toga.App("Movie Search", "org.beeware.beebo.search", startup=build)
