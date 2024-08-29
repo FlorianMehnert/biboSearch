@@ -1,0 +1,294 @@
+{
+  "files": [
+    {
+      "nameSuffix": "-16",
+      "height": 16,
+      "width": 16
+    },
+    {
+      "nameSuffix": "-20",
+      "height": 20,
+      "width": 20
+    },
+    {
+      "nameSuffix": "-29",
+      "height": 29,
+      "width": 29
+    },
+    {
+      "nameSuffix": "-32",
+      "height": 32,
+      "width": 32
+    },
+    {
+      "nameSuffix": "-40",
+      "height": 40,
+      "width": 40
+    },
+    {
+      "nameSuffix": "-48",
+      "height": 48,
+      "width": 48
+    },
+    {
+      "nameSuffix": "-58",
+      "height": 58,
+      "width": 58
+    },
+    {
+      "nameSuffix": "-60",
+      "height": 60,
+      "width": 60
+    },
+    {
+      "nameSuffix": "-64",
+      "height": 64,
+      "width": 64
+    },
+    {
+      "nameSuffix": "-72",
+      "height": 72,
+      "width": 72
+    },
+    {
+      "nameSuffix": "-80",
+      "height": 80,
+      "width": 80
+    },
+    {
+      "nameSuffix": "-87",
+      "height": 87,
+      "width": 87
+    },
+    {
+      "nameSuffix": "-96",
+      "height": 96,
+      "width": 96
+    },
+    {
+      "nameSuffix": "-120",
+      "height": 120,
+      "width": 120
+    },
+    {
+      "nameSuffix": "-128",
+      "height": 128,
+      "width": 128
+    },
+    {
+      "nameSuffix": "-144",
+      "height": 144,
+      "width": 144
+    },
+    {
+      "nameSuffix": "-152",
+      "height": 152,
+      "width": 152
+    },
+    {
+      "nameSuffix": "-167",
+      "height": 167,
+      "width": 167
+    },
+    {
+      "nameSuffix": "-180",
+      "height": 180,
+      "width": 180
+    },
+    {
+      "nameSuffix": "-192",
+      "height": 192,
+      "width": 192
+    },
+    {
+      "nameSuffix": "-256",
+      "height": 256,
+      "width": 256
+    },
+    {
+      "nameSuffix": "-512",
+      "height": 512,
+      "width": 512
+    },
+    {
+      "nameSuffix": "-640",
+      "height": 640,
+      "width": 640
+    },
+    {
+      "nameSuffix": "-1024",
+      "height": 1024,
+      "width": 1024
+    },
+    {
+      "nameSuffix": "-1280",
+      "height": 1280,
+      "width": 1280
+    },
+    {
+      "nameSuffix": "-1920",
+      "height": 1920,
+      "width": 1920
+    },
+    {
+      "nameSuffix": "-round-16",
+      "height": 16,
+      "width": 16
+    },
+    {
+      "nameSuffix": "-round-32",
+      "height": 32,
+      "width": 32
+    },
+    {
+      "nameSuffix": "-round-48",
+      "height": 48,
+      "width": 48
+    },
+    {
+      "nameSuffix": "-round-64",
+      "height": 64,
+      "width": 64
+    },
+    {
+      "nameSuffix": "-round-72",
+      "height": 72,
+      "width": 72
+    },
+    {
+      "nameSuffix": "-round-96",
+      "height": 96,
+      "width": 96
+    },
+    {
+      "nameSuffix": "-round-144",
+      "height": 144,
+      "width": 144
+    },
+    {
+      "nameSuffix": "-round-192",
+      "height": 192,
+      "width": 192
+    },
+    {
+      "nameSuffix": "-square-16",
+      "height": 16,
+      "width": 16
+    },
+    {
+      "nameSuffix": "-square-32",
+      "height": 32,
+      "width": 32
+    },
+    {
+      "nameSuffix": "-square-48",
+      "height": 48,
+      "width": 48
+    },
+    {
+      "nameSuffix": "-square-64",
+      "height": 64,
+      "width": 64
+    },
+    {
+      "nameSuffix": "-square-72",
+      "height": 72,
+      "width": 72
+    },
+    {
+      "nameSuffix": "-square-96",
+      "height": 96,
+      "width": 96
+    },
+    {
+      "nameSuffix": "-square-144",
+      "height": 144,
+      "width": 144
+    },
+    {
+      "nameSuffix": "-square-192",
+      "height": 192,
+      "width": 192
+    },
+    {
+      "nameSuffix": "-square-320",
+      "height": 320,
+      "width": 320
+    },
+    {
+      "nameSuffix": "-square-480",
+      "height": 480,
+      "width": 480
+    },
+    {
+      "nameSuffix": "-square-512",
+      "height": 512,
+      "width": 512
+    },
+    {
+      "nameSuffix": "-square-640",
+      "height": 640,
+      "width": 640
+    },
+    {
+      "nameSuffix": "-square-960",
+      "height": 960,
+      "width": 960
+    },
+    {
+      "nameSuffix": "-square-1280",
+      "height": 1280,
+      "width": 1280
+    },
+    {
+      "nameSuffix": "-square-320",
+      "height": 320,
+      "width": 320
+    },
+    {
+      "nameSuffix": "-square-480",
+      "height": 480,
+      "width": 480
+    },
+    {
+      "nameSuffix": "-square-640",
+      "height": 640,
+      "width": 640
+    },
+    {
+      "nameSuffix": "-square-960",
+      "height": 960,
+      "width": 960
+    },
+    {
+      "nameSuffix": "-square-1280",
+      "height": 1280,
+      "width": 1280
+    },
+    {
+      "nameSuffix": "-adaptive-108",
+      "height": 108,
+      "width": 108
+    },
+    {
+      "nameSuffix": "-adaptive-162",
+      "height": 162,
+      "width": 162
+    },
+    {
+      "nameSuffix": "-adaptive-216",
+      "height": 216,
+      "width": 216
+    },
+    {
+      "nameSuffix": "-adaptive-324",
+      "height": 324,
+      "width": 324
+    },
+    {
+      "nameSuffix": "-adaptive-432",
+      "height": 432,
+      "width": 432
+    }
+  ]
+}
