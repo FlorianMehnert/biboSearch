@@ -1,7 +1,6 @@
 import toga
 from toga.style.pack import *
 from .glue.search import search
-
 import os
 import sys
 
@@ -11,28 +10,36 @@ sys.path.append(site_packages_dir)
 
 
 def build(app):
-    main_box = toga.Box(style=Pack(direction=ROW, padding=10))
-
-    search_input = toga.TextInput(placeholder="Search a movie")
-    main_box.add(search_input)
-
     def search_movies(widget):
         search_term = search_input.value
         print(search_term)
         titles = search(search_term)
         result_box.clear()
         for title in titles:
-            result_box.add(toga.Label(title))
+            result_box.add(toga.Label(title, style=Pack(padding=(0, 0, 5, 0))))
+    main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
+    # Top section with search input and button
+    top_box = toga.Box(style=Pack(direction=ROW, padding=(0, 0, 5, 0)))
+    search_input = toga.TextInput(placeholder="Search a movie", style=Pack(flex=1))
     search_button = toga.Button("Search", on_press=search_movies)
-    main_box.add(search_button)
 
-    result_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
-    main_box.add(result_box)
+    top_box.add(search_input)
+    top_box.add(search_button)
+
+    main_box.add(top_box)
+
+    # Scrollable result area
+    result_scroll = toga.ScrollContainer(style=Pack(flex=1))
+    result_box = toga.Box(style=Pack(direction=COLUMN, padding=5))
+    result_scroll.content = result_box
+
+    main_box.add(result_scroll)
+
+
 
     return main_box
 
 
 def main():
-    #icon_path = os.path.abspath('icons/searching.png')
-    return toga.App("First App", "org.beeware.beebo.search", startup=build)
+    return toga.App("Movie Search", "org.beeware.beebo.search", startup=build)
