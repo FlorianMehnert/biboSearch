@@ -65,7 +65,7 @@ def search(search_term):
             dvd_link = title_tag['href'] if title_tag else None
             kind_of_medium = a.find("img")
             kind_of_medium = kind_of_medium.get("title") if kind_of_medium else ""
-            titles.append(interpret_str(year, "no year") + " " + interpret_str(kind_of_medium) + " " + interpret_str(title) + f"{' ausleihbar' if ausleihbar else ''}")
+            titles.append((interpret_str(year, "no year") + " " + interpret_str(kind_of_medium) + " " + interpret_str(title), ausleihbar))
         except Exception as e:
             print(e)
 
