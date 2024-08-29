@@ -1,5 +1,6 @@
 import toga
 from toga.style.pack import *
+from toga.style import Pack
 from .glue.search import search
 import os
 import sys
@@ -13,15 +14,18 @@ def build(app):
     main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
     # Create a box for search input, medium selection, and button
-    search_box = toga.Box(style=Pack(direction=ROW, padding=5))
+    search_box = toga.Box(style=Pack(direction=ROW, padding=5, alignment='center'))
 
-    search_input = toga.TextInput(placeholder="Search a movie", style=Pack(flex=1))
+    search_input = toga.TextInput(
+        placeholder="Search a movie",
+        style=Pack(flex=1, padding=(0, 5), height=48)
+    )
     search_box.add(search_input)
 
     # Add medium selection widget
     medium_selection = toga.Selection(
         items=['All', 'DVD', 'Book', 'CD', 'eBook'],
-        style=Pack(width=100)
+        style=Pack(width=100, padding=(0, 5), height=48)
     )
     search_box.add(medium_selection)
 
@@ -47,7 +51,11 @@ def build(app):
                 label = toga.Label(title, style=Pack(padding=5))
             result_box.add(label)
 
-    search_button = toga.Button("Search", on_press=search_movies)
+    search_button = toga.Button(
+        "Search",
+        on_press=search_movies,
+        style=Pack(padding=(0, 5), height=48, width=100, background_color='#4CAF50', color='white')
+    )
     search_box.add(search_button)
 
     # Add search box to main box
