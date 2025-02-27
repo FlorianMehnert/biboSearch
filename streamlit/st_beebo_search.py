@@ -41,6 +41,8 @@ def get_medium(kind_of):
             return "📀"
         case "Blu-ray Disc":
             return "🔵"
+        case "CD":
+            return "💿"
         case _:
             return kind_of
 
@@ -106,13 +108,20 @@ def search(search_term):
 
         # Extract the link to the DVD
         dvd_link = title_tag['href'] if title_tag else None
-        kind_of_medium = a.find("img")
+        kind_of_medium_raw = a.find("img")
 
-        kind_of_medium = kind_of_medium.get("title") if kind_of_medium else None
+        kind_of_medium = kind_of_medium_raw.get("title") if kind_of_medium_raw else None
         response = session.get(BASE_LOGGED_IN_URL + dvd_link)
-        titles.append(("✅ " if ausleihbar else "❌ ") + year + f" {get_medium(kind_of_medium)} " + title + f"{" ausleihbar" if ausleihbar else " " + find_due_dates(response.content)[0]}")
+        due_dates = find_due_dates(response.content)
+        titles.append(
+            ("✅ " if ausleihbar else "❌ ")
+            + (year if year else " unknown year ")
+            + f" {get_medium(kind_of_medium)} "
+            + title if title else " unknown title"
+            + f"{" ausleihbar" if ausleihbar else " "}"
+            + (due_dates[0] if due_dates and not ausleihbar else "")
+        )
     return titles
-
 
 film = st.text_input("search a movie")
 titles = search(film)
