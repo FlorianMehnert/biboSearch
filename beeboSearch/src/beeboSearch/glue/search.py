@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import threading
+import time
 
 BASE_URL = "https://katalog.bibo-dresden.de/webOPACClient/start.do?Login=webopac&BaseURL=this"
 BASE_LOGGED_IN_URL = "https://katalog.bibo-dresden.de"
@@ -64,33 +65,60 @@ def get_next_page_link(soup: BeautifulSoup):
     return None
 
 
-def request_page(session, url, params=None):
+def request_page(session, url, params=None, status_callback=None):
+    if status_callback:
+        status_callback(f"Requesting page: {url[:50]}...")
+
     try:
         if params is None:
-            response = session.get(url)
+            response = session.get(url, timeout=30)  # Add timeout
         else:
-            response = session.get(url, params=params)
+            response = session.get(url, params=params, timeout=30)  # Add timeout
 
         if response.status_code == 200:
+            if status_callback:
+                status_callback(f"Received response: {response.status_code}")
             return response
         else:
-            print(f"Page returned with status code {response.status_code}")
+            error_msg = f"Page returned with status code {response.status_code}"
+            if status_callback:
+                status_callback(error_msg)
+            print(error_msg)
             return None
+    except requests.exceptions.Timeout:
+        error_msg = f"Request timed out for {url[:50]}"
+        if status_callback:
+            status_callback(error_msg)
+        print(error_msg)
+        return None
     except Exception as e:
-        print(f"Error requesting page: {str(e)}")
+        error_msg = f"Error requesting page: {str(e)}"
+        if status_callback:
+            status_callback(error_msg)
+        print(error_msg)
         return None
 
 
-def extract_metadata(session: requests.Session, soup: BeautifulSoup):
+def extract_metadata(session: requests.Session, soup: BeautifulSoup, status_callback=None):
+    if status_callback:
+        status_callback("Extracting metadata from page...")
+
     results = []
     table = soup.find("table")
-    if table:
-        table = table.children
-    else:
+    if not table:
+        if status_callback:
+            status_callback("No results table found on page")
         return []
 
+    table = table.children
+
+    item_count = 0
     for a in [a for a in table if hasattr(a, 'text') and "st" in a.text]:
         try:
+            item_count += 1
+            if status_callback and item_count % 3 == 0:  # Update status every few items
+                status_callback(f"Processing item {item_count}...")
+
             # title
             title_tag = a.find("a", href=True, title=None)
             title = title_tag.get_text(strip=True) if title_tag else None
@@ -112,15 +140,25 @@ def extract_metadata(session: requests.Session, soup: BeautifulSoup):
             kind_of_medium = kind_of_medium_raw.get("title") if kind_of_medium_raw else None
 
             if item_link:
-                response = session.get(BASE_LOGGED_IN_URL + item_link)
-                due_dates = find_due_dates(response.content)
-                current_media = Media(url=item_link, ausleihbar=ausleihbar, year=year, title=title, due_dates=due_dates)
+                if status_callback:
+                    status_callback(f"Fetching details for: {title[:30]}...")
+
+                # Simplify - don't fetch details for each item to speed up search
+                current_media = Media(url=item_link, ausleihbar=ausleihbar, year=year, title=title, due_dates=[])
                 current_media.kind_of_medium = kind_of_medium
                 results.append((str(current_media), ausleihbar))
+
+                # Optional: Wait a moment to allow UI updates
+                time.sleep(0.1)
         except Exception as e:
-            print(f"Error processing item: {str(e)}")
+            error_msg = f"Error processing item: {str(e)}"
+            if status_callback:
+                status_callback(error_msg)
+            print(error_msg)
             continue
 
+    if status_callback:
+        status_callback(f"Extracted {len(results)} items from page")
     return results
 
 
@@ -157,6 +195,11 @@ def search(search_term, max_pages=3, callback=None):
 
     all_results = []
 
+    # Status update helper
+    def status_update(message):
+        if callback:
+            callback([], status_message=message)
+
     # Run search in a background thread to avoid blocking the UI
     def search_thread():
         nonlocal all_results
@@ -165,17 +208,25 @@ def search(search_term, max_pages=3, callback=None):
         session = requests.Session()
 
         # Initialize the session and get the CSId
+        status_update("Initializing search session...")
         url = BASE_URL
-        response = session.get(url)
+        response = request_page(session, url, status_callback=status_update)
+        if not response:
+            status_update("Failed to initialize session")
+            if callback:
+                callback([], is_final=True, status_message="Search failed: Could not connect to library")
+            return
+
         soup = BeautifulSoup(response.content, 'html.parser')
         csid_input = soup.find('input', {'name': 'CSId'})
         if not csid_input:
-            print("Could not initialize search session.")
+            status_update("Failed to get CSID token")
             if callback:
-                callback([])
+                callback([], is_final=True, status_message="Search failed: Authentication issue")
             return
 
         csid = csid_input['value']
+        status_update(f"Got CSID: {csid[:5]}...")
 
         # Prepare search URL
         search_url = f'{BASE_LOGGED_IN_URL}/webOPACClient/search.do?methodToCall=submit&CSId={csid}&methodToCallParameter=submitSearch'
@@ -195,58 +246,69 @@ def search(search_term, max_pages=3, callback=None):
         }
 
         # Execute the search
-        response = request_page(session=session, url=search_url, params=params)
+        status_update(f"Searching for: '{search_term}'...")
+        response = request_page(session, search_url, params=params, status_callback=status_update)
         if not response:
             if callback:
-                callback([])
+                callback([], is_final=True, status_message="Search failed: Could not submit search")
             return
 
         soup = BeautifulSoup(response.content, 'html.parser')
 
+        # Check if we have results
+        if "keine Treffer" in soup.get_text():
+            status_update("No results found")
+            if callback:
+                callback([], is_final=True, status_message=f"No results found for '{search_term}'")
+            return
+
         # Determine total pages
         total_pages = get_max_pages(soup)
-        print(f"Found {total_pages} pages of results.")
+        status_update(f"Found {total_pages} pages of results")
 
         # Limit to specified max pages
         pages_to_fetch = min(total_pages, max_pages)
 
         # Process first page
-        first_page_results = extract_metadata(session=session, soup=soup)
+        status_update("Processing first page...")
+        first_page_results = extract_metadata(session, soup, status_callback=status_update)
         all_results.extend(first_page_results)
 
         # If callback is provided, send first batch of results
         if callback and first_page_results:
-            callback(first_page_results)
+            callback(first_page_results, current_page=1, total_pages=pages_to_fetch)
 
         # Process remaining pages
         current_page = 1
         next_url = get_next_page_link(soup)
 
         while next_url and current_page < pages_to_fetch:
-            print(f"Fetching page {current_page + 1} of {pages_to_fetch}...")
-            response = request_page(session=session, url=next_url)
+            current_page += 1
+            status_update(f"Fetching page {current_page} of {pages_to_fetch}...")
+            response = request_page(session, next_url, status_callback=status_update)
             if not response:
+                status_update(f"Failed to load page {current_page}")
                 break
 
             soup = BeautifulSoup(response.content, 'html.parser')
-            page_results = extract_metadata(session=session, soup=soup)
+            page_results = extract_metadata(session, soup, status_callback=status_update)
             all_results.extend(page_results)
 
             # If callback is provided, send this batch of results
             if callback and page_results:
-                callback(page_results)
+                callback(page_results, current_page=current_page, total_pages=pages_to_fetch)
 
             # Get next page URL
             next_url = get_next_page_link(soup)
-            current_page += 1
 
-        print(f"Found {len(all_results)} items across {current_page} pages.")
+        status_update(f"Completed search with {len(all_results)} items across {current_page} pages")
 
         # Final callback with all results
         if callback:
-            callback(all_results, is_final=True)
+            callback(all_results, is_final=True, status_message=f"Found {len(all_results)} items")
 
     # Start the search in a background thread
+    status_update("Starting search...")
     thread = threading.Thread(target=search_thread)
     thread.daemon = True  # Make thread exit when main program exits
     thread.start()
