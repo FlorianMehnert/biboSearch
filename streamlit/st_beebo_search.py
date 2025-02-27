@@ -60,53 +60,69 @@ def get_next_page_link(soup: BeautifulSoup):
     next_page_link = soup.find('a', title="Nächste Seite")
     if next_page_link:
         next_page_url = next_page_link.get('href')
-        return f"https://katalog.bibo-dresden.de{next_page_url}"  # Ensure full URL
+        return f"{BASE_LOGGED_IN_URL}{next_page_url}"  # Ensure full URL
+    return None
 
 
 def request_page(session, url, params=None):
-    if params is None:
-        response = session.get(url)
-    else:
-        response = session.get(url, params=params)
-    if response.status_code == 200:
-        return response
-    else:
-        st.warning(f"page returned with {response.status_code}")
+    try:
+        if params is None:
+            response = session.get(url)
+        else:
+            response = session.get(url, params=params)
+
+        if response.status_code == 200:
+            return response
+        else:
+            st.warning(f"Page returned with status code {response.status_code}")
+            return None
+    except Exception as e:
+        st.error(f"Error requesting page: {str(e)}")
+        return None
 
 
 def extract_metadata(session: requests.Session, soup: BeautifulSoup):
-    titles: list[str] = []
+    titles = []
     table = soup.find("table")
     if table:
         table = table.children  # [0].find_all('tr')
     else:
         return []
-    for a in [a for a in table if "st" in a.text]:
-        row_number = a.find("th").get_text(strip=True)
 
-        # title
-        title_tag = a.find("a", href=True, title=None)  # Exclude links with title="vormerken/bestellen"
-        title = title_tag.get_text(strip=True) if title_tag else None
+    for a in [a for a in table if hasattr(a, 'text') and "st" in a.text]:
+        try:
+            row_number = a.find("th").get_text(strip=True)
 
-        # Extract the year of the DVD
-        text = a.get_text(strip=True)
-        year = None
-        if '[' in text and ']' in text:
-            year = text.split('[')[1].split(']')[0]
+            # title
+            title_tag = a.find("a", href=True, title=None)  # Exclude links with title="vormerken/bestellen"
+            title = title_tag.get_text(strip=True) if title_tag else None
 
-        ausleihbar = False
-        if a.find("span", class_="textgruen"):
-            ausleihbar = True
+            # Extract the year of the DVD
+            text = a.get_text(strip=True)
+            year = None
+            if '[' in text and ']' in text:
+                year = text.split('[')[1].split(']')[0]
 
-        # Extract the link to the DVD
-        dvd_link = title_tag['href'] if title_tag else None
-        kind_of_medium_raw = a.find("img")
+            ausleihbar = False
+            if a.find("span", class_="textgruen"):
+                ausleihbar = True
 
-        kind_of_medium = kind_of_medium_raw.get("title") if kind_of_medium_raw else None
-        response = session.get(BASE_LOGGED_IN_URL + dvd_link)
-        due_dates = find_due_dates(response.content)
-        current_media = Media(url="", ausleihbar=ausleihbar, year=year, title=title, due_dates=due_dates)
-        titles.append(str(current_media))
+            # Extract the link to the DVD
+            dvd_link = title_tag['href'] if title_tag else None
+            kind_of_medium_raw = a.find("img")
+
+            kind_of_medium = kind_of_medium_raw.get("title") if kind_of_medium_raw else None
+
+            if dvd_link:
+                response = session.get(BASE_LOGGED_IN_URL + dvd_link)
+                due_dates = find_due_dates(response.content)
+                current_media = Media(url=dvd_link, ausleihbar=ausleihbar, year=year, title=title, due_dates=due_dates)
+                current_media.kind_of_medium = kind_of_medium
+                titles.append(current_media)
+        except Exception as e:
+            st.warning(f"Error processing item: {str(e)}")
+            continue
+
     return titles
 
 
@@ -123,61 +139,113 @@ def get_max_pages(soup: BeautifulSoup):
             results_per_page = 10  # Adjust based on site pagination
             total_pages = (last_position // results_per_page) + 1
             return total_pages
+    return 1  # If we can't determine, assume at least 1 page
 
 
 @st.cache_resource
 def search(search_term, max_pages):
-    if search_term:
-        session = requests.Session()
-    else:
+    if not search_term:
         return []
-    url = BASE_URL
-    response = session.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    csid_input = soup.find('input', {'name': 'CSId'})
-    if csid_input:
+
+    with st.spinner("Searching for media..."):
+        # Create a session for maintaining cookies
+        session = requests.Session()
+
+        # Initialize the session and get the CSId
+        url = BASE_URL
+        response = session.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        csid_input = soup.find('input', {'name': 'CSId'})
+        if not csid_input:
+            st.error("Could not initialize search session.")
+            return []
+
         csid = csid_input['value']
 
-    search_url = f'https://katalog.bibo-dresden.de/webOPACClient/search.do?methodToCall=submit&CSId={csid}&methodToCallParameter=submitSearch'
-    params = {
-        'searchCategories[0]': '-1',
-        'searchString[0]': f'{search_term}',
-        'callingPage': 'searchParameters',
-        'selectedViewBranchlib': '0',
-        'selectedSearchBranchlib': '',
-        'searchRestrictionID[0]': '8',
-        'searchRestrictionValue1[0]': '',
-        'searchRestrictionID[1]': '6',
-        'searchRestrictionValue1[1]': '',
-        'searchRestrictionID[2]': '3',
-        'searchRestrictionValue1[2]': '',
-        'searchRestrictionValue2[2]': ''
-    }
-    # response = session.post(search_url, data=data, allow_redirects=False)
-    response = request_page(session=session, url=search_url, params=params)  # session.get(search_url, params=params)
+        # Prepare search URL
+        search_url = f'{BASE_LOGGED_IN_URL}/webOPACClient/search.do?methodToCall=submit&CSId={csid}&methodToCallParameter=submitSearch'
+        params = {
+            'searchCategories[0]': '-1',
+            'searchString[0]': f'{search_term}',
+            'callingPage': 'searchParameters',
+            'selectedViewBranchlib': '0',
+            'selectedSearchBranchlib': '',
+            'searchRestrictionID[0]': '8',
+            'searchRestrictionValue1[0]': '',
+            'searchRestrictionID[1]': '6',
+            'searchRestrictionValue1[1]': '',
+            'searchRestrictionID[2]': '3',
+            'searchRestrictionValue1[2]': '',
+            'searchRestrictionValue2[2]': ''
+        }
 
-    # Enable cookie persistence
-    soup = BeautifulSoup(response.content, 'html.parser')
+        # Execute the search
+        response = request_page(session=session, url=search_url, params=params)
+        if not response:
+            return []
 
-    next_url = get_next_page_link(soup)
-    st.write("next url is: " + next_url)
-    if next_url:
-        st.write(get_max_pages(soup))
-        #response = request_page(session=session, url=next_url)
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    return extract_metadata(session=session, soup=soup)
+        # Determine total pages
+        total_pages = get_max_pages(soup)
+        st.info(f"Found {total_pages} pages of results.")
+
+        # Limit to user-specified max pages
+        pages_to_fetch = min(total_pages, max_pages)
+
+        # Initialize progress bar
+        progress_bar = st.progress(0)
+
+        # Initialize results list
+        all_results = []
+
+        # Process first page
+        first_page_results = extract_metadata(session=session, soup=soup)
+        all_results.extend(first_page_results)
+
+        # Update progress
+        progress_bar.progress(1 / pages_to_fetch if pages_to_fetch > 0 else 1.0)
+
+        # Process remaining pages
+        current_page = 1
+        next_url = get_next_page_link(soup)
+
+        while next_url and current_page < pages_to_fetch:
+            st.info(f"Fetching page {current_page + 1} of {pages_to_fetch}...")
+            response = request_page(session=session, url=next_url)
+            if not response:
+                break
+
+            soup = BeautifulSoup(response.content, 'html.parser')
+            page_results = extract_metadata(session=session, soup=soup)
+            all_results.extend(page_results)
+
+            # Get next page URL
+            next_url = get_next_page_link(soup)
+            current_page += 1
+
+            # Update progress
+            progress_bar.progress((current_page) / pages_to_fetch if pages_to_fetch > 0 else 1.0)
+
+        progress_bar.progress(1.0)
+        st.success(f"Found {len(all_results)} items across {current_page} pages.")
+
+        return [str(media) for media in all_results]
 
 
-film = st.text_input("search a movie")
-max_pages = st.number_input("max_pages", min_value=1, step=1)
-titles = search(film, max_pages)
-st.selectbox("results", titles)
+# Streamlit UI
+st.title("Library Media Search")
 
-# check with the following for one page
-# "everything everywhere all at once"
+film = st.text_input("Search for a movie, book, or other media")
+max_pages = st.number_input("Maximum pages to search", min_value=1, value=3, step=1)
 
-# check with the following for multipage but no movie in the first page
-# "fight club"
+if st.button("Search") or film:
+    titles = search(film, max_pages)
 
-# check with the following for alot of pages to test max pages
-# "harry"
+    if titles:
+        selected_title = st.selectbox("Results", titles)
+
+        # Display count of results
+        st.write(f"Found {len(titles)} items")
+    else:
+        st.warning("No results found. Try a different search term.")
