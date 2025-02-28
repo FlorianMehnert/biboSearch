@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="122.91323mm"
-   height="122.91323mm"
-   viewBox="0 0 122.91323 122.91323"
+   width="108mm"
+   height="108mm"
+   viewBox="0 0 108 108"
    version="1.1"
    id="svg1"
    inkscape:version="1.4 (1:1.4+202410161351+e7c3feb100)"
@@ -23,15 +23,22 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.3291485"
-     inkscape:cx="-49.27967"
-     inkscape:cy="144.45339"
+     inkscape:zoom="1.8796998"
+     inkscape:cx="77.139976"
+     inkscape:cy="173.43195"
      inkscape:window-width="2494"
      inkscape:window-height="1371"
      inkscape:window-x="66"
      inkscape:window-y="32"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     showguides="true">
+    <sodipodi:guide
+       position="-94.847227,23.299576"
+       orientation="1,0"
+       id="guide1"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
   <defs
      id="defs1" />
   <g
@@ -40,48 +47,37 @@
      id="layer1"
      transform="translate(-28.560505,-58.524082)">
     <rect
-       style="fill:#e76c00;fill-opacity:1;stroke-width:0.177148;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.4"
+       style="fill:#e76c00;fill-opacity:1;stroke-width:0.191346;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.4"
        id="rect3"
-       width="15.334413"
-       height="60.403133"
-       x="68.153191"
-       y="110.30166"
-       ry="0.70970339"
-       transform="rotate(-15.81182)" />
+       width="16.762667"
+       height="64.468933"
+       x="54.870853"
+       y="102.4548"
+       ry="0.75747418"
+       transform="matrix(0.96411867,-0.26547163,0.2796402,0.96010487,0,0)" />
     <rect
-       style="fill:#640036;fill-opacity:1;stroke:none;stroke-width:0.296332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#640036;fill-opacity:1;stroke:none;stroke-width:0.320065;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.4;stroke-dasharray:none;stroke-opacity:1"
        id="rect1"
-       width="9.3644361"
-       height="53.657097"
-       x="66.422447"
-       y="91.852097"
-       ry="0.63044119" />
+       width="10.257463"
+       height="57.146378"
+       x="49.560505"
+       y="88.374275"
+       ry="0.67143834" />
     <rect
-       style="fill:#bd1a7f;fill-opacity:1;stroke:none;stroke-width:0.373976;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#bd1a7f;fill-opacity:1;stroke:none;stroke-width:0.403927;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.4;stroke-dasharray:none;stroke-opacity:1"
        id="rect1-5"
-       width="21.219381"
-       height="60.403133"
-       x="75.78688"
-       y="85.106064"
-       ry="0.70970339" />
+       width="23.242945"
+       height="64.3311"
+       x="59.818031"
+       y="81.189552"
+       ry="0.75585485" />
     <rect
-       style="fill:#740000;fill-opacity:1;stroke:none;stroke-width:0.198207;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.4;stroke-opacity:1"
+       style="fill:#740000;fill-opacity:1;stroke:none;stroke-width:0.214082;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.4;stroke-opacity:1"
        id="rect2"
-       width="10.519811"
-       height="47.108238"
-       x="97.006264"
-       y="98.400955"
-       ry="0.70970339" />
-    <text
-       xml:space="preserve"
-       style="font-size:35.646px;line-height:1.25;font-family:'Source Sans 3';-inkscape-font-specification:'Source Sans 3, ';mix-blend-mode:soft-light;fill:#fbeded;fill-opacity:0.81033897;stroke:none;stroke-width:0.185656;stroke-opacity:1"
-       x="76.261383"
-       y="130.87077"
-       id="text1"><tspan
-         sodipodi:role="line"
-         id="tspan1"
-         style="font-size:35.646px;fill:#fbeded;fill-opacity:0.81033897;stroke:none;stroke-width:0.185656;stroke-opacity:1"
-         x="76.261383"
-         y="130.87077">B</tspan></text>
+       width="11.523021"
+       height="50.171654"
+       x="83.060799"
+       y="95.348999"
+       ry="0.75585485" />
   </g>
 </svg>
