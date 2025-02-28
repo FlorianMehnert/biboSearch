@@ -19,8 +19,7 @@ class Media:
         self.kind_of_medium = ""
 
     def __str__(self):
-        ausleihbar = "✅ " if self.ausleihbar else "❌ "
-        return ausleihbar + self.year + " " + get_medium(self.kind_of_medium) + " " + self.title + " " + f"{" ausleihbar" if self.ausleihbar else " nicht ausleihbar "}" + (self.due_dates[0] if self.due_dates and not self.ausleihbar else "")
+        return self.year + " " + get_medium(self.kind_of_medium) + " " + self.title + " " + f"{" ausleihbar" if self.ausleihbar else " nicht ausleihbar "}" + (self.due_dates[0] if self.due_dates and not self.ausleihbar else "")
 
 
 def find_due_dates(html_content):

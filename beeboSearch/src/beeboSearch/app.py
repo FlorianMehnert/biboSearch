@@ -20,7 +20,7 @@ class MovieSearchApp(toga.App):
         search_box = toga.Box(style=Pack(direction=ROW, padding=5, alignment='center'))
 
         self.search_input = toga.TextInput(
-            placeholder="Search a movie",
+            placeholder="Suche ...z.B fight club",
             style=Pack(flex=1, padding=(0, 5), height=48)
         )
         search_box.add(self.search_input)
@@ -33,7 +33,7 @@ class MovieSearchApp(toga.App):
 
         # Add max pages selection
         pages_box = toga.Box(style=Pack(direction=ROW, padding=(5, 0), alignment='center'))
-        pages_label = toga.Label("Max pages:", style=Pack(padding=(0, 5)))
+        pages_label = toga.Label("Maximale Seitenanzahl:", style=Pack(padding=(0, 5)))
         self.max_pages = toga.NumberInput(
             min_value=1,
             max_value=10,
@@ -67,7 +67,7 @@ class MovieSearchApp(toga.App):
 
         # Progress indicator
         progress_box = toga.Box(style=Pack(direction=ROW, padding=5, alignment='center'))
-        self.progress_label = toga.Label("Ready to search", style=Pack(flex=1))
+        self.progress_label = toga.Label("Bereit zum Suchen", style=Pack(flex=1))
         self.progress_indicator = toga.ProgressBar(max=100, value=0, style=Pack(width=200))
         progress_box.add(self.progress_label)
         progress_box.add(self.progress_indicator)
@@ -75,7 +75,7 @@ class MovieSearchApp(toga.App):
 
         # Activity log - shows what's happening during search
         self.activity_label = toga.Label(
-            "Enter a search term and press Search",
+            "Gib einen Suchbegriff ein und drücke Suche",
             style=Pack(padding=5)
         )
         self.status_box.add(self.activity_label)
@@ -129,7 +129,7 @@ class MovieSearchApp(toga.App):
     def cancel_search(self, widget):
         """Cancel the current search operation"""
         self.search_cancelled = True
-        self.activity_label.text = "Cancelling search..."
+        self.activity_label.text = "Suche wird abgebrochen..."
         self.cancel_button.enabled = False
 
     def update_activity_log(self, message):
@@ -148,8 +148,8 @@ class MovieSearchApp(toga.App):
 
         if not search_term:
             self.main_window.info_dialog(
-                "Input Required",
-                "Please enter a search term"
+                "Eingabe benötigt",
+                "Suche ...z.B fight club"
             )
             return
 
@@ -162,12 +162,12 @@ class MovieSearchApp(toga.App):
         self.search_cancelled = False
 
         # Show progress indicator
-        self.progress_label.text = f"Searching for: {search_term}"
+        self.progress_label.text = f"Suche nach: {search_term}"
         self.progress_indicator.value = 0
-        self.status_label.text = "Searching..."
+        self.status_label.text = "Ist am suchen..."
         self.search_button.enabled = False
         self.cancel_button.enabled = True
-        self.activity_label.text = f"Starting search for '{search_term}'..."
+        self.activity_label.text = f"Starte Suche nach '{search_term}'..."
 
         # Call the search function with a callback to handle results
         search(search_term, max_pages, callback=self.handle_search_results)
@@ -192,7 +192,7 @@ class MovieSearchApp(toga.App):
                 self.expected_pages = total_pages
                 progress_value = (self.current_pages / self.expected_pages) * 100
                 self.progress_indicator.value = progress_value
-                self.progress_label.text = f"Loading page {self.current_pages} of {self.expected_pages}..."
+                self.progress_label.text = f"Laden der Seite {self.current_pages} of {self.expected_pages}..."
 
             # Process the results
             new_items = 0
@@ -230,8 +230,8 @@ class MovieSearchApp(toga.App):
 
             # Update status with new items
             if new_items > 0:
-                self.update_activity_log(f"Added {new_items} new items to results")
-                self.status_label.text = f"Found {self.filtered_results} items matching '{selected_medium}' filter"
+                self.update_activity_log(f"Füge {new_items} neue Einträge zu Ergebnissen")
+                self.status_label.text = f"{self.filtered_results} Ergebnisse die zu '{selected_medium}' passen wurden gefunden"
 
             # If this is the final callback, update the status
             if is_final:
@@ -241,21 +241,21 @@ class MovieSearchApp(toga.App):
 
                 # Create final status message
                 if self.search_cancelled:
-                    final_message = "Search was cancelled."
+                    final_message = "Suche wurde abgebrochen."
                 elif self.total_results == 0:
-                    final_message = "No results found."
+                    final_message = "Keine Ergebnisse gefunden."
                 else:
                     final_message = f"Found {self.filtered_results} items matching '{selected_medium}' out of {self.total_results} total results."
 
                 self.status_label.text = final_message
-                self.progress_label.text = "Search complete"
+                self.progress_label.text = "Suche war erfolgreich"
                 self.activity_label.text = final_message
 
                 # Show completion dialog if necessary
                 if self.total_results == 0 and not self.search_cancelled:
                     self.main_window.info_dialog(
-                        "No Results",
-                        "No matching items found. Try a different search term."
+                        "Keine Ergebnisse",
+                        "Keine passenden Ergebnisse gefunden. Versuche einen anderen Suchbegriff."
                     )
 
         # Schedule the UI update on the main thread
@@ -263,4 +263,4 @@ class MovieSearchApp(toga.App):
 
 
 def main():
-    return MovieSearchApp("Library Search", "org.beeware.beebo.search")
+    return MovieSearchApp("beebo", "org.beeware.beebo.search")
